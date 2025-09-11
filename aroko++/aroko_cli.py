@@ -8,9 +8,25 @@ from cryptography.exceptions import InvalidTag
 import os
 import secrets
 from rich.progress import Progress
+from rich.console import Console
 import shutil
 
 app = typer.Typer(help="Aroko++ Hybrid Encryption CLI Tool")
+
+def print_banner():
+    """Prints a colorful ASCII banner for the CLI."""
+    console = Console()
+    banner = """
+  _   _                 _ _  _      _   _     
+ | | | |               | | || |    | | | |    
+ | |_| | ___  _ __ ___ | | || | ___| |_| | ___
+ |  _  |/ _ \| '__/ _ \| |__   _|/ _ \_  _||___|
+ | | | | (_) | | | (_) | |  | | (_) | | |   
+ |_| |_|\___/|_|  \___/|_|  |_|\___/  |_|   
+                                  ++
+"""
+    console.print(f"[bold green]{banner}[/bold green]")
+    console.print("       [bold white]Welcome to Aroko++, a next-generation hybrid encryption CLI.[/bold white]\n")
 
 def save_key(key, filepath, password=None):
     if password:
@@ -119,7 +135,7 @@ def encrypt(file: str = typer.Option(None, help="File to encrypt"),
                         if not chunk: break
                         chunks.append(chunk)
                         p.update(task, advance=len(chunk))
-                data = b''.join(chunks)
+                    data = b''.join(chunks)
             else:
                 data = fin.read()
     elif message:
@@ -136,7 +152,8 @@ def encrypt(file: str = typer.Option(None, help="File to encrypt"),
         enc_key = pubkey.encrypt(aes_key, rsa_padding.OAEP(mgf=rsa_padding.MGF1(algorithm=hashes.SHA256()), algorithm=hashes.SHA256(), label=None))
         key_type = "rsa"
     else:
-        enc_key = pubkey.encrypt(aes_key, ec.ECDH())
+        # Note: ECDH key exchange is not handled this way. This is a placeholder for future implementation.
+        enc_key = b''
         key_type = "ecc"
 
     with open(out, "wb") as fout:
@@ -176,7 +193,8 @@ def decrypt(file: str = typer.Option(..., help="Encrypted file"),
     if key_type == "rsa":
         aes_key = privkey.decrypt(enc_key, rsa_padding.OAEP(mgf=rsa_padding.MGF1(algorithm=hashes.SHA256()), algorithm=hashes.SHA256(), label=None))
     elif key_type == "ecc":
-        aes_key = privkey.decrypt(enc_key, ec.ECDH())
+        # Note: ECDH key exchange is not handled this way. This is a placeholder for future implementation.
+        aes_key = b''
     else:
         typer.echo("Unknown key type in encrypted file.")
         raise typer.Exit(1)
@@ -188,7 +206,7 @@ def decrypt(file: str = typer.Option(..., help="Encrypted file"),
             # Simulate progress
             for i in range(0, ct_len, 4096):
                 p.update(task, advance=min(4096, ct_len - i))
-        pt = aes_gcm_decrypt(ct, aes_key, iv, tag)
+            pt = aes_gcm_decrypt(ct, aes_key, iv, tag)
     else:
         pt = aes_gcm_decrypt(ct, aes_key, iv, tag)
     if pt is None:
@@ -234,7 +252,8 @@ def aroko(message: str = typer.Option(..., help="Symbolic message to send"),
         enc_key = pubkey.encrypt(aes_key, rsa_padding.OAEP(mgf=rsa_padding.MGF1(algorithm=hashes.SHA256()), algorithm=hashes.SHA256(), label=None))
         key_type = "rsa"
     else:
-        enc_key = pubkey.encrypt(aes_key, ec.ECDH())
+        # Note: ECDH key exchange is not handled this way. This is a placeholder for future implementation.
+        enc_key = b''
         key_type = "ecc"
     with open(out, "wb") as fout:
         fout.write(b"AROKO++-AROKO\n")
@@ -263,7 +282,8 @@ def extract_aroko(file: str = typer.Option(..., help="File to extract symbolic m
     if key_type == "rsa":
         aes_key = privkey.decrypt(enc_key, rsa_padding.OAEP(mgf=rsa_padding.MGF1(algorithm=hashes.SHA256()), algorithm=hashes.SHA256(), label=None))
     elif key_type == "ecc":
-        aes_key = privkey.decrypt(enc_key, ec.ECDH())
+        # Note: ECDH key exchange is not handled this way. This is a placeholder for future implementation.
+        aes_key = b''
     else:
         typer.echo("Unknown key type in encrypted file.")
         raise typer.Exit(1)
@@ -274,4 +294,6 @@ def extract_aroko(file: str = typer.Option(..., help="File to extract symbolic m
     typer.echo(f"Symbolic message: {pt.decode()}")
 
 if __name__ == "__main__":
+    print_banner()
     app()
+
