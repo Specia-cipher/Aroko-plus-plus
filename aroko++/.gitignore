@@ -1,0 +1,34 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.pkl
+*.db
+*.sqlite3
+
+# Virtual environment
+venv/
+ENV/
+env/
+
+# Editor/temp files
+*.swp
+*.swo
+*.bak
+*.tmp
+*.log
+*.out
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Secrets / keys (if you want to avoid committing them)
+# aroko_keys_rsa/
+# aroko_keys_ecc/
+
+# Encrypted test outputs (optional)
+*.enc
+*.scrubbed
+
